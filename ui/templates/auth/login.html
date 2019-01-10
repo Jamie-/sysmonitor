@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block head %}
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}" />
+{% endblock %}
+
+
+{% block body %}
+    <form class="form-signin" action="/login" method="post">
+        {{ form.hidden_tag() }}
+        <img class="mb-4 logo" src="{{ url_for('static', filename='logo-white.svg') }}" alt="Sysmonitor Logo" width="150" height="150">
+        <h1 class="h3 mb-3 font-weight-normal">Sign in</h1>
+
+        {# Flashed messages #}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="alert-list">
+                    {% for category, message in messages %}
+                        <li class="alert alert-{{ category }}" role="alert">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <label for="username" class="sr-only">Username</label>
+        {{ form.username(class='form-control', placeholder='Username', required=True, autofocus=True) }}
+        <label for="password" class="sr-only">Password</label>
+        {{ form.password(class='form-control', placeholder='Password', required=True) }}
+
+        <p><a href="/login/reset">Forgotten your password?</a></p>
+
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+        <p class="mt-5 mb-3 text-muted">&copy; 2018</p>
+    </form>
+{% endblock %}

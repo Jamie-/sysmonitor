@@ -1,0 +1,8 @@
+flask
+flask-wtf
+flask-login
+gunicorn
+pymysql
+cryptography
+sqlalchemy
+requests

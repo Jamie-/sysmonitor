@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}" />
+{% endblock %}
+
+
+{% block body %}
+    {# Left nav panel #}
+    <div class="sidebar">
+        <nav class="sidebar-sticky">
+            <a class="navbar-brand w-100 p-3" href="/">Sysmonitor</a>
+            <a class="text-muted" href="#monitoring-collapse" data-toggle="collapse" role="button" aria-expanded="true" aria-controls="monitoring-collapse">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-2 pt-2 pb-1 text-muted">
+                    <span>Monitoring</span>
+                    <span class="d-flex">
+                        <i class="fas fa-angle-down"></i>
+                    </span>
+                </h6>
+            </a>
+            <ul class="nav collapse show" id="monitoring-collapse">
+                <li class="nav-item {% if request.path == '/admin/status' %}active{% endif %}">
+                    <a class="nav-link" href="/admin/status">Status
+                        {% if request.path == '/admin/status' %}<span class="sr-only">(current)</span>{% endif %}
+                    </a>
+                </li>
+                <li class="nav-item {% if request.path == '/admin/services' %}active{% endif %}">
+                    <a class="nav-link" href="/admin/services">Services
+                        {% if request.path == '/admin/services' %}<span class="sr-only">(current)</span>{% endif %}
+                    </a>
+                </li>
+                <li class="nav-item {% if request.path == '/admin/groups' %}active{% endif %}">
+                    <a class="nav-link" href="/admin/groups">Groups
+                        {% if request.path == '/admin/groups' %}<span class="sr-only">(current)</span>{% endif %}
+                    </a>
+                </li>
+                <li class="nav-item {% if request.path == '/admin/webhooks' %}active{% endif %}">
+                    <a class="nav-link" href="/admin/webhooks">Webhooks
+                        {% if request.path == '/admin/webhooks' %}<span class="sr-only">(current)</span>{% endif %}
+                    </a>
+                </li>
+            </ul>
+            <hr>
+
+            <a class="text-muted" href="#settings-collapse" data-toggle="collapse" role="button" aria-expanded="true" aria-controls="settings-collapse">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-2 pt-2 pb-1 text-muted">
+                    <span>Settings</span>
+                    <span class="d-flex">
+                        <i class="fas fa-angle-down"></i>
+                    </span>
+                </h6>
+            </a>
+            <ul class="nav collapse show" id="settings-collapse">
+                <li class="nav-item {% if request.path == '/admin/users' %}active{% endif %}">
+                    <a class="nav-link" href="/admin/users">Users
+                        {% if request.path == '/admin/users' %}<span class="sr-only">(current)</span>{% endif %}
+                    </a>
+                </li>
+                <li class="nav-item {% if request.path == '/admin/settings' %}active{% endif %}">
+                    <a class="nav-link" href="/admin/settings">System Settings
+                        {% if request.path == '/admin/settings' %}<span class="sr-only">(current)</span>{% endif %}
+                    </a>
+                </li>
+            </ul>
+        <hr>
+        </nav>
+    </div>
+
+    {# Main page panel #}
+    <div class="main-wrapper">
+        <main role="main">
+            {# Top navbar #}
+            <nav class="navbar navbar-light">
+                <h2>{% block heading %}{% endblock %}</h2>
+{#                <ul class="navbar-nav mr-auto">#}
+{#                    <li class="nav-item">#}
+{#                        <a class="nav-link" href="#">Link</a>#}
+{#                    </li>#}
+{#                </ul>#}
+                {# User links #}
+                <div class="nav-item dropdown">
+                    <a class="dropdown-toggle nav-link" href="#" role="button" id="user-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-user"></i> {{ flask_login.current_user.display_name }}
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="user-dropdown">
+                        <a class="dropdown-item" href="/logout">Sign Out</a>
+                    </div>
+                </div>
+            </nav>
+
+            {# Page content container #}
+            <div class="container-fluid">
+                {% block content %}{% endblock %}
+            </div>
+
+
+            {# Flashed messages #}
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                <ul class="alert-list">
+                    {% for category, message in messages %}
+                        <li class="alert alert-{{ category }} alert-dismissible fade show" role="alert">{{ message }}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <script>
+                    {# Close alerts after 4s #}
+                    window.setTimeout(function () {
+                        $(".alert-dismissible").alert('close');
+                    }, 4000);
+                </script>
+            {% endwith %}
+        </main>
+    </div>
+{% endblock %}
+
+
+{% block script %}
+    {{ super() }}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.2.2/jquery.form.min.js" integrity="sha384-FzT3vTVGXqf7wRfy8k4BiyzvbNfeYjK+frTVqZeNDFl8woCbF0CYG6g2fMEFFo/i" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jscolor/2.0.4/jscolor.min.js" integrity="sha256-CJWfUCeP3jLdUMVNUll6yQx37gh9AKmXTRxvRf7jzro=" crossorigin="anonymous"></script>
+    <script src="{{ url_for('static', filename='admin.js') }}"></script>
+{% endblock %}

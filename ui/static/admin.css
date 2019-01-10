@@ -1,0 +1,171 @@
+/*
+ * Sidebar
+ */
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 250px;
+}
+
+.sidebar-sticky {
+    position: relative;
+    top: 0;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+    background: #000f4d;
+}
+
+@supports ((position: -webkit-sticky) or (position: sticky)) {
+    .sidebar-sticky {
+        position: -webkit-sticky;
+        position: sticky;
+    }
+}
+
+.sidebar .nav {
+    display: block;
+}
+
+.collapse:not(.show) {
+    display: none !important;
+}
+
+.sidebar hr {
+    border-top: 1px solid rgba(255,255,255,.1);
+}
+
+.sidebar .nav-link {
+    font-weight: 500;
+    color: #9ea9b7;
+}
+
+.sidebar .nav-item:hover,
+.sidebar .nav-item:focus {
+    background-color: #001581;
+}
+
+.sidebar .nav-item.active a {
+    color: #fff;
+}
+
+.sidebar a {
+    text-decoration: none;
+}
+
+.sidebar-heading {
+    font-size: .75rem;
+    text-transform: uppercase;
+}
+
+.navbar-light {
+    background-color: #fff;
+}
+
+
+/*
+ * Content
+ */
+
+body {
+    background-color: #eff0f1;
+}
+
+body div.main-wrapper {
+    width: calc(100% - 250px);
+    margin-left: 250px;
+    margin-right: 0;
+}
+
+main .container-fluid {
+    margin-top: 10px;
+}
+
+
+
+/*
+ * Navbar
+ */
+
+.navbar-brand {
+    padding-top: .75rem;
+    padding-bottom: .75rem;
+    color: #fff;
+}
+
+.navbar-brand:hover,
+.navbar-brand:focus {
+    color: #fff;
+}
+
+.navbar .form-control {
+    padding: .75rem 1rem;
+    border-width: 0;
+    border-radius: 0;
+}
+
+.form-control-dark {
+    color: #fff;
+    background-color: rgba(255, 255, 255, .1);
+    border-color: rgba(255, 255, 255, .1);
+}
+
+.form-control-dark:focus {
+    border-color: transparent;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, .25);
+}
+
+
+/*
+ * Alerts
+ */
+
+ul.alert-list {
+    padding-left: 0;
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+    width: 500px;
+    margin-bottom: 0;
+}
+
+li.alert {
+    list-style-type: none;
+    text-align: left;
+    margin-bottom: 0.5rem;
+}
+
+li.alert:last-of-type {
+    margin-bottom: 0;
+}
+
+/*
+ * Cards
+ */
+
+.card-body:first-child:not(:only-child) {
+    padding-bottom: 0;
+}
+
+.card-body:last-child:not(:only-child) {
+    padding-top: 0;
+}
+
+
+/*
+ * Tables
+ */
+
+.table td {
+    vertical-align: middle;
+}
+
+.table-full-width {
+    margin-left: -1.25rem;
+    margin-right: -1.25rem;
+    width: inherit;
+    margin-bottom: 0;
+}

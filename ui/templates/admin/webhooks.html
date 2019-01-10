@@ -1,0 +1,264 @@
+{% extends "admin/base_admin.html" %}
+
+{% block heading %}Webhooks{% endblock %}
+
+
+{% block content %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <button class="btn btn-success mb-3 float-right" title="Add webhook" data-toggle="modal" data-target="#addModal"><i class="fas fa-plus"></i> Add Webhook</button>
+                </div>
+                <div class="card-body">
+                    <table class="table table-full-width">
+                        <thead>
+                            <tr>
+                                <th class="text-nowrap"><i class="fas fa-history" title="Status of last request"></i></th>
+                                <th class="w-50">Name</th>
+                                <th class="w-50">URL</th>
+                                <th class="text-nowrap">Date Added</th>
+                                <th class="text-nowrap">Added By</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for webhook in webhooks %}
+                                <tr>
+                                    <td class="text-nowrap">{# TODO implement last request status #}</td>
+                                    <td><span title="{{ webhook.slug }}">{{ webhook.name }}</span></td>
+                                    <td class="mono-text text-nowrap">{% if webhook.is_secure() %}<i class="fas fa-lock text-success" title="Requests will be encrypted"></i> {% endif %}{{ webhook.url|truncate(40, True) }}</td>
+                                    <td class="text-nowrap">{{ webhook.date_added|prettydate }}</td>
+                                    <td class="text-nowrap">
+                                        {% if webhook.added_by %}
+                                            <span title="{{ webhook.added_user.username }}">{{ webhook.added_user.display_name }}</span>
+                                        {% else %}
+                                            <span class="font-italic">System</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-nowrap">
+                                        <button
+                                                class="btn btn-sm btn-info"
+                                                title="Info"
+                                                data-toggle="modal"
+                                                data-target="#infoModal"
+                                                data-slug="{{ webhook.slug }}"
+                                                data-name="{{ webhook.name }}"
+                                                data-url="{{ webhook.url|b64encode }}"
+                                                data-secure="{{ webhook.is_secure() }}"
+                                                data-dateadded="{{ webhook.date_added|prettydate }}"
+                                                data-addedby-username="{{ webhook.added_user.username }}"
+                                                data-addedby-displayname="{{ webhook.added_user.display_name }}"
+                                                data-verify="{{ webhook.verify }}">
+                                            <i class="fas fa-info-circle fa-fw"></i>
+                                        </button>
+                                        {# TODO add history view and link to anchor below #}
+                                        <a
+                                                class="btn btn-sm btn-warning"
+                                                title="History"
+                                                href="#">
+                                            <i class="fas fa-history fa-fw"></i>
+                                        </a>
+                                        <button
+                                                class="btn btn-sm btn-danger"
+                                                title="Delete"
+                                                data-toggle="modal"
+                                                data-target="#deleteModal"
+                                                data-slug="{{ webhook.slug }}"
+                                                data-name="{{ webhook.name }}">
+                                            <i class="fas fa-trash fa-fw"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Add Group Modal #}
+    <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="addUserModalLabel">Add Webhook</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="addForm">
+                    {{ add_form.hidden_tag() }}
+                    <div class="modal-body">
+                        <div class="form-group" id="addForm-slug">
+                            <label for="add-slug">Slug</label>
+                            {{ add_form.slug(class='form-control', placeholder='Slug', autofocus=true) }}
+                            {# TODO add helpful slug text #}
+                            <small class="form-text text-muted">May only contain: A-Z a-z 0-9 . _ -</small>
+                        </div>
+                        <div class="form-group" id="addForm-name">
+                            <label for="add-name">Name</label>
+                            {{ add_form.name(class='form-control', placeholder='Name') }}
+                            <small class="form-text text-muted">How would you like the webhook to appear.</small>
+                        </div>
+                        <div class="form-group" id="addForm-url">
+                            <label for="add-url">URL</label>
+                            {{ add_form.url(class='form-control', placeholder='https://...') }}
+                            <small class="form-text text-muted">URL to be called when the webhook is triggered. Must begin <code>http://</code> or <code>https://</code>.</small>
+                        </div>
+                        <div class="form-check">
+                            {{ add_form.verify(class='form-check-input', checked=true) }}
+                            <label class="form-check-label" for="add-verify">Verify certificate</label>
+                            <small class="form-text text-muted">Abort request if hook uses HTTPS and does not have a valid certificate.</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        {{ add_form.submit(class='btn btn-success') }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {# Info Modal #}
+    <div class="modal fade" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="infoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title" id="infoModalLabel"><i class="fas fa-info-circle"></i> Info</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h1 class="h3 mb-0" id="info-name"></h1>
+                    <p class="text-muted" title="Slug"><span class="mono-text" id="info-slug"></span></p>
+                    <pre id="info-url"></pre>
+                    <p>Added on: <span id="info-dateAdded"></span></p>
+                    <p>Added by: <span id="info-addedBy-displayName"></span> <span class="text-muted">(<span id="info-addedBy-username"></span>)</span></p>
+                    <p>Last request status: <span id="info-lastStatus"></span></p>
+                    <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="info-verify" disabled>
+                            <label class="form-check-label" for="info-verify">Verify certificate</label>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Delete Modal #}
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteModalLabel"><i class="fas fa-exclamation-triangle"></i> Confirm Deletion</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">Are you sure you want to delete the webhook <span class="m-name font-weight-bold"></span> <small class="text-muted">(<span class="m-slug"></span>)</small>?</p>
+                    <p class="mb-0">This action can't be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <form method="post" action="{{ url_for('admin.route_webhooks') }}">
+                        {{ delete_form.hidden_tag() }}
+                        {{ delete_form.delete(class='btn btn-danger') }}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block script %}
+    {{ super() }}
+    <script>
+        {# Fill info modal with text/data #}
+        $('#infoModal').on('show.bs.modal', function (event) {
+            $("#info-warning").remove();
+            var button = $(event.relatedTarget);
+            var slug = button.data('slug');
+            var name = button.data('name');
+            var url = atob(button.data('url'));
+            var dateAdded = button.data('dateadded');
+            var addedBy_username = button.data('addedby-username');
+            var addedBy_displayName = button.data('addedby-displayname');
+            //TODO implement last request status
+            var verify = false;
+            if (button.data('verify') === 'True') {
+                verify = true;
+            }
+            var modal = $(this);
+            modal.find('#info-name').text(name);
+            modal.find('#info-slug').text(slug);
+            modal.find('#info-url').text(url);
+            if (button.data('secure') === 'False') {
+                elem = '<div id="info-warning" class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> This connection is not secure.</div>';
+                $(elem).insertAfter("#info-url");
+            }
+            modal.find('#info-dateAdded').text(dateAdded);
+            modal.find('#info-addedBy-username').text(addedBy_username);
+            modal.find('#info-addedBy-displayName').text(addedBy_displayName);
+            modal.find('#info-verify').prop('checked', verify);
+        });
+
+        {# Fill delete modal with text/data #}
+        $('#deleteModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var slug = button.data('slug');
+            var name = button.data('name');
+            var modal = $(this);
+            modal.find('.m-slug').text(slug);
+            modal.find('.m-name').text(name);
+            modal.find('#delete-slug').val(slug);
+        });
+
+        {# Handle Add Webhook form submission #}
+        $("#addForm").ajaxForm({url: "{{ url_for('admin.route_webhooks') }}", type: 'post', success: function (resp, status) {
+            formHandler(resp, status, function () {
+                // Validation success
+                location.reload();
+            }, function (reason) {
+                // Action failed
+                $("#addModal").modal("hide");
+                makeAlert(reason, "danger");
+            }, function (resp) {
+                // Validation failed
+                $("#addForm input[type='text']").removeClass("is-invalid");
+                $("#addForm .invalid-feedback").remove();
+
+                if (resp.errors.hasOwnProperty("slug")) {
+                    $("#add-slug").addClass("is-invalid");
+                    $("#addForm-slug .invalid-feedback").remove();
+                    for (var i = 0; i < resp.errors.slug.length; i++) {
+                        $("#addForm-slug").append('<div class="invalid-feedback">' + resp.errors.slug[i] + "</div>");
+                    }
+                }
+                if (resp.errors.hasOwnProperty("name")) {
+                    $("#add-name").addClass("is-invalid");
+                    $("#addForm-name .invalid-feedback").remove();
+                    for (var i = 0; i < resp.errors.name.length; i++) {
+                        $("#addForm-name").append('<div class="invalid-feedback">' + resp.errors.name[i] + "</div>");
+                    }
+                }
+                if (resp.errors.hasOwnProperty("url")) {
+                    $("#add-url").addClass("is-invalid");
+                    $("#addForm-url .invalid-feedback").remove();
+                    for (var i = 0; i < resp.errors.url.length; i++) {
+                        $("#addForm-url").append('<div class="invalid-feedback">' + resp.errors.url[i] + "</div>");
+                    }
+                }
+                if (resp.errors.hasOwnProperty("verify")) {
+                    $("#add-verify").addClass("is-invalid");
+                    $("#addForm-verify .invalid-feedback").remove();
+                    for (var i = 0; i < resp.errors.verify.length; i++) {
+                        $("#addForm-verify").append('<div class="invalid-feedback">' + resp.errors.verify[i] + "</div>");
+                    }
+                }
+            });
+        }});
+    </script>
+{% endblock %}

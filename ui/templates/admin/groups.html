@@ -1,0 +1,276 @@
+{% extends "admin/base_admin.html" %}
+
+{% block heading %}Groups{% endblock %}
+
+
+{% block content %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <button class="btn btn-success mb-3 float-right" title="Add group" data-toggle="modal" data-target="#addModal"><i class="fas fa-plus"></i> Add Group</button>
+                </div>
+                <div class="card-body">
+                    <table class="table table-full-width">
+                        <thead>
+                            <tr>
+                                <th class="w-100">Group</th>
+                                <th class="text-nowrap">Date Modified</th>
+                                <th class="text-nowrap">Modified By</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for group in groups %}
+                                <tr>
+                                    <td>
+                                        {% if group.icon %}
+                                            <i class="{{ group.icon }} fa-fw" {% if group.color %}style="color: #{{ group.color }};"{% endif %}></i>
+                                        {% elif group.color %}
+                                            <i class="fas fa-circle fa-fw" style="color: #{{ group.color }};"></i>
+                                        {% else %}
+                                            <i class="fas fa-circle fa-fw" style="color: #fff;"></i>
+                                        {% endif %}
+                                        {{ group.name }}
+                                        <span class="text-muted">({{ group.slug }})</span>
+                                    </td>
+                                    <td class="text-nowrap">{% if group.date_modified %}{{ group.date_modified|prettydate }}{% endif %}</td>
+                                    <td class="text-nowrap">
+                                        {% if group.modified_by %}
+                                            <span title="{{ group.modified_user.username }}">{{ group.modified_user.display_name }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-nowrap">
+                                        <button
+                                                class="btn btn-sm btn-primary"
+                                                title="Edit"
+                                                data-toggle="modal"
+                                                data-target="#editModal"
+                                                data-name="{{ group.name }}"
+                                                data-slug="{{ group.slug }}"
+                                                data-color="{{ group.color }}"
+                                                data-dateadded="{{ group.date_added|prettydate }}"
+                                                data-addedby-username="{{ group.added_user.username }}"
+                                                data-addedby-displayname="{{ group.added_user.display_name }}">
+                                            <i class="fas fa-edit fa-fw"></i>
+                                        </button>
+                                        <button
+                                                class="btn btn-sm btn-danger"
+                                                title="Delete"
+                                                data-toggle="modal"
+                                                data-target="#deleteModal"
+                                                data-slug="{{ group.slug }}"
+                                                data-name="{{ group.name }}">
+                                            <i class="fas fa-trash fa-fw"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Add Modal #}
+    <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="addModalLabel">Add Group</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="addForm">
+                    {{ add_form.hidden_tag() }}
+                    <div class="modal-body">
+                        <div class="form-group" id="addForm-slug">
+                            <label for="add-slug">Slug</label>
+                            {{ add_form.slug(class='form-control', placeholder='Slug', autofocus=true) }}
+                            {# TODO add helpful slug text #}
+                            <small class="form-text text-muted">May only contain: A-Z a-z 0-9 . _ -</small>
+                        </div>
+                        <div class="form-group" id="addForm-name">
+                            <label for="add-name">Name</label>
+                            {{ add_form.name(class='form-control', placeholder='Name') }}
+                            <small class="form-text text-muted">How would you like the group to appear.</small>
+                        </div>
+                        {# TODO add icon picker for FA icons #}
+                        <div class="form-group" id="addForm-color">
+                            <label for="add-color">Colour</label>
+                            {{ add_form.color(class='form-control text-center jscolor {zIndex: 2000}') }}
+                            <small class="form-text text-muted">Accent color for services in this group to have.</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        {{ add_form.submit(class='btn btn-success') }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {# Edit Modal #}
+    <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="editModalLabel">Edit Group</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="editForm">
+                    {{ edit_form.hidden_tag() }}
+                    <div class="modal-body">
+                        <div class="form-group" id="editForm-slug">
+                            <label for="edit-slug-f">Slug</label>
+                            <input type="text" class="form-control" id="edit-slug-f" disabled>
+                            <small class="form-text text-muted">You cannot change the group slug.</small>
+                        </div>
+                        <div class="form-group" id="editForm-name">
+                            <label for="edit-name">Name</label>
+                            {{ edit_form.name(class='form-control', placeholder='Name') }}
+                        </div>
+                        {# TODO add icon picker for FA icons #}
+                        <div class="form-group" id="editForm-color">
+                            <label for="edit-color">Colour</label>
+                            {{ edit_form.color(class='form-control text-center jscolor {zIndex: 2000}') }}
+                        </div>
+                        <p class="mb-0">Added on: <span id="edit-dateAdded"></span></p>
+                        <p>Added by: <span id="edit-addedBy-displayName"></span> <span class="text-muted">(<span id="edit-addedBy-username"></span>)</span></p>
+                    </div>
+                    <div class="modal-footer">
+                        {{ edit_form.submit(class='btn btn-primary') }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {# Delete Modal #}
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteModalLabel"><i class="fas fa-exclamation-triangle"></i> Confirm Deletion</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">Are you sure you want to delete the group <span id="delete-name" class="font-weight-bold"></span> <small class="text-muted">(<span id="delete-slug-f"></span>)</small>?</p>
+                    <p class="mb-0">This action can't be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <form method="post" action="{{ url_for('admin.route_groups') }}">
+                        {{ delete_form.hidden_tag() }}
+                        {{ delete_form.delete(class='btn btn-danger') }}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block script %}
+    {{ super() }}
+    <script>
+        {# Fill edit modal with text/data #}
+        $('#editModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var slug = button.data('slug');
+            var name = button.data('name');
+            var color = button.data('color');
+            var dateAdded = button.data('dateadded');
+            var addedBy_username = button.data('addedby-username');
+            var addedBy_displayName = button.data('addedby-displayname');
+            var modal = $(this);
+            modal.find('#edit-slug').val(slug);
+            modal.find('#edit-slug-f').val(slug);
+            modal.find('#edit-name').val(name);
+            document.getElementById('edit-color').jscolor.fromString(color);
+            modal.find('#edit-dateAdded').text(dateAdded);
+            modal.find('#edit-addedBy-username').text(addedBy_username);
+            modal.find('#edit-addedBy-displayName').text(addedBy_displayName);
+        });
+
+        {# Fill delete modal with text/data #}
+        $('#deleteModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var slug = button.data('slug');
+            var name = button.data('name');
+            var modal = $(this);
+            modal.find('#delete-slug-f').text(slug);
+            modal.find('#delete-name').text(name);
+            modal.find('#delete-slug').val(slug);
+        });
+
+        {# Handle add form submission #}
+        $("#addForm").ajaxForm({url: "{{ url_for('admin.route_groups') }}", type: 'post', success: function (resp, status) {
+            formHandler(resp, status, function () {
+                // Validation success
+                location.reload();
+            }, function (reason) {
+                // Action failed
+                $("#addModal").modal("hide");
+                makeAlert(reason, "danger");
+            }, function (resp) {
+                // Validation failed
+                $("#addForm input[type='text']").removeClass("is-invalid");
+                $("#addForm .invalid-feedback").remove();
+
+                if (resp.errors.hasOwnProperty("slug")) {
+                    $("#add-slug").addClass("is-invalid");
+                    for (var i = 0; i < resp.errors.slug.length; i++) {
+                        $("#addForm-slug").append('<div class="invalid-feedback">' + resp.errors.slug[i] + "</div>");
+                    }
+                }
+                if (resp.errors.hasOwnProperty("name")) {
+                    $("#add-name").addClass("is-invalid");
+                    for (var i = 0; i < resp.errors.name.length; i++) {
+                        $("#addForm-name").append('<div class="invalid-feedback">' + resp.errors.name[i] + "</div>");
+                    }
+                }
+                if (resp.errors.hasOwnProperty("color")) {
+                    $("#add-color").addClass("is-invalid");
+                    for (var i = 0; i < resp.errors.color.length; i++) {
+                        $("#addForm-color").append('<div class="invalid-feedback">' + resp.errors.color[i] + "</div>");
+                    }
+                }
+            });
+        }});
+
+        {# Handle edit form submission #}
+        $("#editForm").ajaxForm({url: "{{ url_for('admin.route_groups') }}", type: 'post', success: function (resp, status) {
+            formHandler(resp, status, function () {
+                // Validation success
+                location.reload();
+            }, function (reason) {
+                // Action failed
+                $("#editModal").modal("hide");
+                makeAlert(reason, "danger");
+            }, function (resp) {
+                // Validation failed
+                $("#editForm input[type='text']").removeClass("is-invalid");
+                $("#editForm .invalid-feedback").remove();
+
+                if (resp.errors.hasOwnProperty("name")) {
+                    $("#edit-name").addClass("is-invalid");
+                    for (var i = 0; i < resp.errors.name.length; i++) {
+                        $("#editForm-name").append('<div class="invalid-feedback">' + resp.errors.name[i] + "</div>");
+                    }
+                }
+                if (resp.errors.hasOwnProperty("color")) {
+                    $("#edit-color").addClass("is-invalid");
+                    for (var i = 0; i < resp.errors.color.length; i++) {
+                        $("#editForm-color").append('<div class="invalid-feedback">' + resp.errors.color[i] + "</div>");
+                    }
+                }
+            });
+        }});
+    </script>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "admin/base_admin.html" %}
+
+{% block heading %}Settings{% endblock %}
+
+
+{% block content %}
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-warning" role="alert">
+                <h4 class="alert-heading"><i class="fas fa-exclamation-triangle"></i> <span class="font-weight-bold">Here be dragons!</span></h4>
+                <p class="mb-0">Changing things in here could break this application, modify with caution.</p>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+{#                <div class="card-body">#}
+{#                    <button class="btn btn-success mb-3 float-right"><i class="fas fa-plus" title="Add option"></i> Add Option</button>#}
+{#                </div>#}
+                <div class="card-body">
+                    <table class="table table-full-width">
+                        <thead>
+                            <tr>
+                                <th class="w-50">Option</th>
+                                <th class="w-50">Value</th>
+                                <th class="text-nowrap">Last Modified</th>
+                                <th class="text-nowrap">Modified By</th>
+{#                                <th></th>#}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for setting in settings %}
+                                <tr>
+                                    <td class="mono-text">{{ setting.key }}</td>
+                                    <td class="mono-text">{{ setting.value }}</td>
+                                    <td class="text-nowrap">{{ setting.date_modified|prettydate }}</td>
+                                    <td class="text-nowrap">
+                                        {% if setting.modified_by is not none %}
+                                            {{ setting.modified_user.display_name }}
+                                        {% else %}
+                                            <span class="font-italic">System</span>
+                                        {% endif %}
+                                    </td>
+{#                                    <td class="text-nowrap">#}
+{#                                        <button class="btn btn-sm btn-primary" title="Edit"><i class="fas fa-edit fa-fw"></i></button>#}
+{#                                        <button class="btn btn-sm btn-danger" title="Delete"><i class="fas fa-trash fa-fw"></i></button>#}
+{#                                    </td>#}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

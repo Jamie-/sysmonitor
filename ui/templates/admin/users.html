@@ -1,0 +1,347 @@
+{% extends "admin/base_admin.html" %}
+
+{% block heading %}Users{% endblock %}
+
+
+{% block content %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <button class="btn btn-success mb-3 float-right" title="Add user" data-toggle="modal" data-target="#addUserModal"><i class="fas fa-plus"></i> Add User</button>
+                </div>
+                <div class="card-body">
+                    <table class="table table-full-width">
+                        <thead>
+                            <tr>
+                                <th style="width: 33%">Username</th>
+                                <th style="width: 33%">Display Name</th>
+                                <th style="width: 33%">Email</th>
+                                <th>Date Added</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                                <tr>
+                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.display_name }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td class="text-nowrap">{{ user.date_added|prettydate }}</td>
+                                    <td class="text-nowrap">
+                                        <button
+                                                class="btn btn-sm btn-primary"
+                                                title="Edit"
+                                                data-toggle="modal"
+                                                data-target="#editModal"
+                                                data-username="{{ user.username }}"
+                                                data-displayname="{{ user.display_name }}"
+                                                data-email="{{ user.email }}">
+                                            <i class="fas fa-edit fa-fw"></i>
+                                        </button>
+                                        <button
+                                                class="btn btn-sm btn-info"
+                                                title="Reset password"
+                                                data-toggle="modal"
+                                                data-target="#passwordModal"
+                                                data-username="{{ user.username }}"
+                                                data-displayname="{{ user.display_name }}">
+                                            <i class="fas fa-key fa-fw"></i>
+                                        </button>
+                                        <button
+                                                class="btn btn-sm btn-danger"
+                                                title="Delete"
+                                                data-toggle="modal"
+                                                data-target="#deleteModal"
+                                                data-username="{{ user.username }}"
+                                                data-displayname="{{ user.display_name }}">
+                                            <i class="fas fa-trash fa-fw"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Add User Modal #}
+    <div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="addUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="addUserModalLabel">Add User</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="addUserForm">
+                    {{ add_form.hidden_tag() }}
+                    <div class="modal-body">
+                        <div class="form-group" id="addUserForm-username">
+                            <label for="add_user-username">Username</label>
+                            {{ add_form.username(class='form-control', placeholder='Username', autofocus=true) }}
+                            <small class="form-text text-muted">May only contain: A-Z a-z 0-9 . _ -</small>
+                        </div>
+                        <div class="form-group" id="addUserForm-displayName">
+                            <label for="add_user-display_name">Display Name</label>
+                            {{ add_form.display_name(class='form-control', placeholder='Display name') }}
+                            <small class="form-text text-muted">What you would like to be called.</small>
+                        </div>
+                        <div class="form-group" id="addUserForm-email">
+                            <label for="add_user-email">Email</label>
+                            {{ add_form.email(class='form-control', placeholder='Email') }}
+                        </div>
+                        <div class="form-group" id="addUserForm-password">
+                            <label for="add_user-password">Password (optional)</label>
+                            {{ add_form.password(class='form-control', placeholder='Password') }}
+                            <small class="form-text text-muted">If no password specified, user will be prompted to set one on first login using link in welcome email.</small>
+                        </div>
+                        <div class="form-check">
+                            {{ add_form.force_reset(class='form-check-input', checked=true) }}
+                            <label class="form-check-label" for="add_user-force_reset">Force reset on first login</label>
+                            <small class="form-text text-muted">If no password specified, this will be ignored.</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        {{ add_form.submit(class='btn btn-success') }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {# Edit User Modal #}
+    <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="editModalLabel">Edit User</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="editForm">
+                    {{ edit_form.hidden_tag() }}
+                    <div class="modal-body">
+                        <div class="form-group" id="editForm-username">
+                            <label for="edit-username-f">Username</label>
+                            <input type="text" class="form-control" id="edit-username-f" disabled>
+                            <small class="form-text text-muted">You cannot change your username.</small>
+                        </div>
+                        <div class="form-group" id="editForm-displayName">
+                            <label for="edit-display_name">Display Name</label>
+                            {{ edit_form.display_name(class='form-control', placeholder='Display name') }}
+                        </div>
+                        <div class="form-group" id="editForm-email">
+                            <label for="edit-email">Email</label>
+                            {{ edit_form.email(class='form-control', placeholder='Email') }}
+                        </div>
+                        <div class="form-check">
+                            {{ edit_form.force_reset(class='form-check-input', checked=false) }}
+                            <label class="form-check-label" for="edit-force_reset">Force password reset on next login</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        {{ edit_form.submit(class='btn btn-primary') }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {# Change Password Modal #}
+    <div class="modal fade" id="passwordModal" tabindex="-1" role="dialog" aria-labelledby="passwordModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title" id="passwordModalLabel">Change Password</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="changePwForm">
+                    {{ reset_pw_form.hidden_tag() }}
+                    <div class="modal-body">
+                        <p>Reset the password for <span id="reset_pw-displayName" class="font-weight-bold"></span> <small class="text-muted">(<span id="reset_pw-username-f"></span>)</small>.</p>
+                        <div class="form-group" id="resetPwFormGroup-password">
+                            <label for="reset_pw-password" class="sr-only">New Password</label>
+                            {{ reset_pw_form.password(class='form-control', placeholder='New password', autofocus=true) }}
+                        </div>
+                        <div class="form-check">
+                            {{ reset_pw_form.force_reset(class='form-check-input', checked=true) }}
+                            <label class="form-check-label" for="reset_pw-force_reset">Force reset on next login</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        {{ reset_pw_form.submit(class='btn btn-info') }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {# Delete Modal #}
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteModalLabel"><i class="fas fa-exclamation-triangle"></i> Confirm Deletion</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">Are you sure you want to delete <span id="delete-username-f" class="font-weight-bold"></span> <small class="text-muted">(<span id="delete-displayName"></span>)</small>?</p>
+                    <p class="mb-0">This action can't be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <form method="post" action="{{ url_for('admin.route_users') }}">
+                        {{ delete_form.hidden_tag() }}
+                        {{ delete_form.delete(class='btn btn-danger') }}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block script %}
+    {{ super() }}
+    <script>
+        {# Fill edit modal with text/data #}
+        $('#editModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var username = button.data('username');
+            var displayName = button.data('displayname');
+            var email = button.data('email');
+            var modal = $(this);
+            modal.find('#edit-username').val(username);
+            modal.find('#edit-username-f').val(username);
+            modal.find('#edit-display_name').val(displayName);
+            modal.find('#edit-email').val(email);
+        });
+
+        {# Fill reset password modal with text/data #}
+        $('#passwordModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var username = button.data('username');
+            var displayName = button.data('displayname');
+            var modal = $(this);
+            modal.find('#reset_pw-username-f').text(username);
+            modal.find('#reset_pw-displayName').text(displayName);
+            modal.find('#reset_pw-username').val(username);
+        });
+
+        {# Fill delete modal with text/data #}
+        $('#deleteModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var username = button.data('username');
+            var displayName = button.data('displayname');
+            var modal = $(this);
+            modal.find('#delete-username-f').text(username);
+            modal.find('#delete-displayName').text(displayName);
+            modal.find('#delete_user-username').val(username);
+        });
+
+        {# Handle Add User form submission #}
+        $("#addUserForm").ajaxForm({url: "{{ url_for('admin.route_users') }}", type: 'post', success: function (resp, status) {
+            formHandler(resp, status, function () {
+                // Validation success
+                location.reload();
+            }, function (reason) {
+                // Action failed
+                $("#addUserModal").modal("hide");
+                makeAlert(reason, "danger");
+            }, function (resp) {
+                // Validation failed
+                $("#addUserForm input[type='text'], #addUserForm input[type='email'], #addUserForm input[type='password']").removeClass("is-invalid");
+                $("#addUserForm .invalid-feedback").remove();
+
+                if (resp.errors.hasOwnProperty("username")) {
+                    $("#add_user-username").addClass("is-invalid");
+                    for (var i = 0; i < resp.errors.username.length; i++) {
+                        $("#addUserForm-username").append('<div class="invalid-feedback">' + resp.errors.username[i] + "</div>");
+                    }
+                }
+                if (resp.errors.hasOwnProperty("display_name")) {
+                    $("#add_user-display_name").addClass("is-invalid");
+                    for (var i = 0; i < resp.errors.display_name.length; i++) {
+                        $("#addUserForm-displayName").append('<div class="invalid-feedback">' + resp.errors.display_name[i] + "</div>");
+                    }
+                }
+                if (resp.errors.hasOwnProperty("email")) {
+                    $("#add_user-email").addClass("is-invalid");
+                    for (var i = 0; i < resp.errors.email.length; i++) {
+                        $("#addUserForm-email").append('<div class="invalid-feedback">' + resp.errors.email[i] + "</div>");
+                    }
+                }
+                if (resp.errors.hasOwnProperty("password")) {
+                    $("#add_user-password").addClass("is-invalid");
+                    for (var i = 0; i < resp.errors.password.length; i++) {
+                        $("#addUserForm-password").append('<div class="invalid-feedback">' + resp.errors.password[i] + "</div>");
+                    }
+                }
+            });
+        }});
+
+        {# Handle edit form submission #}
+        $("#editForm").ajaxForm({url: "{{ url_for('admin.route_users') }}", type: 'post', success: function (resp, status) {
+            formHandler(resp, status, function () {
+                // Validation success
+                location.reload();
+            }, function (reason) {
+                // Action failed
+                $("#editModal").modal("hide");
+                makeAlert(reason, "danger");
+            }, function (resp) {
+                // Validation failed
+                $("#editForm input[type='text'], #editForm input[type='email']").removeClass("is-invalid");
+                $("#editForm .invalid-feedback").remove();
+
+                if (resp.errors.hasOwnProperty("display_name")) {
+                    $("#edit-display_name").addClass("is-invalid");
+                    for (var i = 0; i < resp.errors.display_name.length; i++) {
+                        $("#editForm-displayName").append('<div class="invalid-feedback">' + resp.errors.display_name[i] + "</div>");
+                    }
+                }
+                if (resp.errors.hasOwnProperty("email")) {
+                    $("#edit-email").addClass("is-invalid");
+                    for (var i = 0; i < resp.errors.email.length; i++) {
+                        $("#editForm-email").append('<div class="invalid-feedback">' + resp.errors.email[i] + "</div>");
+                    }
+                }
+            });
+        }});
+
+        {# Handle reset password form submission #}
+        $("#changePwForm").ajaxForm({url: "{{ url_for('admin.route_users') }}", type: "post", success: function (resp, status) {
+            formHandler(resp, status, function () {
+                // Validation success
+                $('#passwordModal').modal("hide");
+                console.log("Password changed OK");
+                makeAlert("Updated password successfully.", "success");
+                // Reset fields
+                var inputs = $("#changePwForm input[type='password']");
+                inputs.val("");
+                inputs.removeClass("is-invalid");
+                inputFeedback = $("#changePwForm .invalid-feedback").remove();
+            }, function (reason) {
+                // Action failed
+                makeAlert(reason, "danger");
+            }, function (resp) {
+                // Validation failed
+                $("#changePwForm .invalid-feedback").remove();
+                if (resp.errors.hasOwnProperty("password")) {
+                    $("#reset_pw-password").addClass("is-invalid");
+                    for (var i = 0; i < resp.errors.password.length; i++) {
+                        $("#resetPwFormGroup-password").append('<div class="invalid-feedback">' + resp.errors.password[i] + "</div>");
+                    }
+                }
+            })
+        }});
+    </script>
+{% endblock %}

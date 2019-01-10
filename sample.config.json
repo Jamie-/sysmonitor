@@ -1,0 +1,12 @@
+{
+  "db": {
+    "host": "localhost",
+    "port": 3306,
+    "db": "sysmon",
+    "username": "username",
+    "password": "password"
+  },
+  "flask": {
+    "secret_key": "<random characters>"
+  }
+}
