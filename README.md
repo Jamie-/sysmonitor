@@ -2,6 +2,13 @@
 
 Undergoing heavy development.
 
+### Virtual Environment Setup
+```
+python3 -m venv venv
+. ./venv/bin/activate
+pip install -r requirements.txt
+```
+
 ### Database Initialisation
 ```python
 from core.db import init_db
