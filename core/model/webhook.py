@@ -1,6 +1,5 @@
 import datetime
 import sqlalchemy
-import flask_login
 from .. import db
 from .. import errors
 from .mixins import ModelMixin, SlugMixin
